@@ -7,25 +7,13 @@ Checkout the [Quickstart: Compose and Rails](https://docs.docker.com/compose/rai
 Basically the process is:
 
 1. Create a [Dockerfile](./Dockerfile)
-1. Create a Gemfile with just the Rails gem like so:
-
-```
-source 'https://rubygems.org'
-gem 'rails', '~>5'
-```
-
+1. Create a Gemfile with just the Rails gem: `gem 'rails', '~>5'`
 1. Create an empty Gemfile.lock file: `touch Gemfile.lock`
-1. Create an entrypoint.sh file like so:
-
-```
-#!/bin/bash
-set -e
-
-# Remove a potentially pre-existing server.pid for Rails.
-rm -f /myapp/tmp/pids/server.pid
-
-# Then exec the container's main process (what's set as CMD in the Dockerfile).
-exec "$@"
-```
-
+1. Create an [entrypoint.sh](./entrypoint.sh) file.
 1. Create a basic [docker-compose.yml](./docker-compose.yml) file.
+1. Build the project `docker-compose run web rails new . --force --no-deps --database=postgresql`
+1. Build the project (again!) to add the rails app to the Docker image `docker-compose build`
+1. Make sure that the [database config](./config/database.yml) `host`, `username` & `password` is set correctly.
+1. Now boot the app! `docker-compose up`
+1. Create the database `docker-compose run web rake db:create`
+1. Open the Rails Welcome page on [http://localhost:3000](http://localhost:3000)
