@@ -17,3 +17,11 @@ Basically the process is:
 1. Now boot the app! `docker-compose up`
 1. Create the database `docker-compose run web rake db:create`
 1. Open the Rails Welcome page on [http://localhost:3000](http://localhost:3000)
+
+## Building an App
+
+Some quick notes on building the app
+
+```
+rails generate scaffold Product title:string description:text image_url:string price:decimal
+```
