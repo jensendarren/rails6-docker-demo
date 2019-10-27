@@ -30,6 +30,7 @@ docker exec -it web bash;
 
 Now run migrations, run rails console, debug etc etc:
 
+
 ```
 rails generate scaffold Product title:string description:text image_url:string price:decimal
 ```
