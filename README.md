@@ -56,13 +56,24 @@ aws ecr create-repository --repository-name demo/rails
 
 Make a note of the `repositoryUri` (e.g. 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails)
 
-## Create Task Definition to run the Rails App and run DB Migrations
+### Create Task Definition to run the Rails App and run DB Migrations
+
+This only needs to be run once for each task definition.
+
+* **NOTE** to update the placeholders in the JSON file before running!
+* **NOTE** if there is a task definition registered with the same name then a new version is created.
 
 ```
-aws ecs register-task-definition --cli-input-json ./aws/railsdemo.json
+aws ecs register-task-definition --cli-input-json file://aws/railsdemo.json
 ```
 
-## Deploy to AWS Container Services (ECS) using AWS Fargate
+...for the migrations:
+
+```
+aws ecs register-task-definition --cli-input-json file://aws/railsmigrations.json
+```
+
+### Deploy to AWS Container Services (ECS) using AWS Fargate
 
 When we are ready to deploy we need to:
 

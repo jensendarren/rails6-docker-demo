@@ -10,6 +10,12 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
+      "entryPoint": [
+        "rake"
+      ],
+      "command": [
+        "db:migrate"
+      ],
       "portMappings": [
         {
           "hostPort": 3000,
@@ -53,7 +59,7 @@
     }
   ],
   "memory": "2048",
-  "family": "railsdemo",
+  "family": "railsmmm",
   "requiresCompatibilities": [
     "FARGATE"
   ],
