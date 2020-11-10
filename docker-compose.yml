@@ -4,7 +4,7 @@ services:
     build: .
     container_name: web
     environment:
-      - DATABASE_PASSWORD=mysecretpassword
+      - DATABASE_URL=postgres://postgres:mysecretpassword@db
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
       - .:/myapp

@@ -18,19 +18,88 @@ Basically the process is:
 1. Create the database `docker-compose run web rake db:create`
 1. Open the Rails Welcome page on [http://localhost:3000](http://localhost:3000)
 
-## Building an App
+## Running the database migrations
 
-Some quick notes on building the app
+After you start the app running for the first time you will need to run the database migrations.
+
+Start the app:
+
+```
+docker-compose up
+```
 
 Enter into a session in the running web container:
 
 ```
-docker exec -it web bash;
+docker exec -it web bash
 ```
 
-Now run migrations, run rails console, debug etc etc:
+Now run the db migrations
 
+```
+rake db:migrate
+```
+
+Of course, you can run rails console, debug etc etc:
 
 ```
 rails generate scaffold Product title:string description:text image_url:string price:decimal
+```
+
+## Deploy to AWS Container Services (ECS) using AWS Fargate
+
+**Install the `aws` cli tool**
+
+Using `aws` cli, authenticate with the AWS Container Registry (ECR) like so:
+
+```
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com
+```
+
+**Create a repository to push the image to**
+
+```
+aws ecr create-repository --repository-name demo/rails
+```
+
+Make a note of the `repositoryUri` (e.g. 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails)
+
+**Build the docker image**
+
+```
+docker build -t rails6demo:latest .
+```
+
+**(Optional) check the contents of the image**
+
+```
+docker run -it --entrypoint bash rails6demo:latest
+```
+
+**Tag the image for AWS ECS**
+
+```
+docker tag rails6demo:latest 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails:latest
+```
+
+**Push to AWS**
+
+```
+docker push 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails:latest
+```
+
+## RDS
+
+Note that RDS needs to have the security group to be configured correctly to allow to connect to it from a bastion host or from yoru local machine.
+
+Connect to it using `psql`
+
+```
+psql -h hostname -U username database
+```
+
+Run migrations:
+
+```
+SECRET_KEY_BASE=asecret RAILS_ENV=staging DATABASE_URL=postgres://username:password@hostname/dataabase bundle exec rake db:migrate
 ```
