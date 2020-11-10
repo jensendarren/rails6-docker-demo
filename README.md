@@ -46,9 +46,36 @@ Of course, you can run rails console, debug etc etc:
 rails generate scaffold Product title:string description:text image_url:string price:decimal
 ```
 
+## AWS ECS
+
+Create a new repository for the app (only needs to be done once)
+
+```
+aws ecr create-repository --repository-name demo/rails
+```
+
+Make a note of the `repositoryUri` (e.g. 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails)
+
+## Create Task Definition to run the Rails App and run DB Migrations
+
+```
+aws ecs register-task-definition --cli-input-json ./aws/railsdemo.json
+```
+
 ## Deploy to AWS Container Services (ECS) using AWS Fargate
 
-**Install the `aws` cli tool**
+When we are ready to deploy we need to:
+
+1. Authenticate with ECR
+1. Precompile any assets
+1. Build the Docker Image
+1. Check the contents of Image
+1. Tag the image for ECR
+1. Push the Image to ECR
+1. Run the database migrations
+1. Update the running ECS Service instance.
+
+**Authenticate Docker Client with AWS ECR**
 
 Using `aws` cli, authenticate with the AWS Container Registry (ECR) like so:
 
@@ -56,13 +83,11 @@ Using `aws` cli, authenticate with the AWS Container Registry (ECR) like so:
 aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com
 ```
 
-**Create a repository to push the image to**
+**Precompile the assets**
 
 ```
-aws ecr create-repository --repository-name demo/rails
+SECRET_KEY_BASE=asecret RAILS_ENV=staging bundle exec rake assets:precompile
 ```
-
-Make a note of the `repositoryUri` (e.g. 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails)
 
 **Build the docker image**
 
@@ -73,19 +98,39 @@ docker build -t rails6demo:latest .
 **(Optional) check the contents of the image**
 
 ```
-docker run -it --entrypoint bash rails6demo:latest
+docker run -it rails6demo:latest bash
 ```
 
-**Tag the image for AWS ECS**
+**Tag the image for AWS ECR**
 
 ```
 docker tag rails6demo:latest 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails:latest
 ```
 
-**Push to AWS**
+**Push to AWS ECR**
 
 ```
 docker push 924583607971.dkr.ecr.ap-southeast-1.amazonaws.com/demo/rails:latest
+```
+
+**Run migrations**
+
+```
+aws ecs run-task --cluster railsdemonew --launch-type FARGATE --task-definition railsmmm:7 --network-configuration '{
+  "awsvpcConfiguration": {
+    "subnets": ["subnet-e10d6796", "subnet-67a6d802"],
+    "securityGroups": ["sg-0f23cc29be7d6939e"],
+    "assignPublicIp": "ENABLED"
+  }
+}'
+```
+
+**Deploy to service**
+
+The command below will force the running tasks in the service `railsdemoservice` to redeploy with the latest docker image that was just pushed to AWS ECR.
+
+```
+aws ecs update-service --cluster railsdemonew --service railsdemoservice --force-new-deployment --region ap-southeast-1
 ```
 
 ## RDS
