@@ -73,6 +73,22 @@ aws ecs register-task-definition --cli-input-json file://aws/railsdemo.json
 aws ecs register-task-definition --cli-input-json file://aws/railsmigrations.json
 ```
 
+### Create a new ECS Cluster
+
+This only needs to be done once.
+
+```
+aws ecs create-cluster --cluster-name railsdemo
+```
+
+### Create a new ECS Service
+
+We need a service for our Rails app that will run in our ECS Cluster. The service will:
+
+* Provision load balancers
+* Implement auto scaling
+* Use an elastic IP address for the load balancers
+
 ### Deploy to AWS Container Services (ECS) using AWS Fargate
 
 When we are ready to deploy we need to:
@@ -141,7 +157,7 @@ aws ecs run-task --cluster railsdemonew --launch-type FARGATE --task-definition 
 The command below will force the running tasks in the service `railsdemoservice` to redeploy with the latest docker image that was just pushed to AWS ECR.
 
 ```
-aws ecs update-service --cluster railsdemonew --service railsdemoservice --force-new-deployment --region ap-southeast-1
+aws ecs update-service --cluster railsdemo --service railsapp --force-new-deployment --region ap-southeast-1
 ```
 
 ## RDS
