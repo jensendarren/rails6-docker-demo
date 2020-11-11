@@ -4,6 +4,7 @@ class ProductsController < ApplicationController
   # GET /products
   # GET /products.json
   def index
+    @hostname = Socket.gethostname
     @products = Product.all
   end
 
